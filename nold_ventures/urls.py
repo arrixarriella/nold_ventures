@@ -26,31 +26,14 @@ from drf_spectacular.views import (
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/v1/", include("accounts.urls")),   
-    path("api/inventory/", include("inventory.urls")),
     path("api/", include("operations.urls")),
+    path("api/inventory/", include("inventory.urls")),
+    path("api/notifications/", include("notification.urls")),
     path("api/otp/", include("accounts.urls")),
-    path('api/notifications/', include('notification.urls')),
-        path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-
-
-
-    # Schema
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-
-    # Swagger UI
-    path(
-        "",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
-    ),
-
-    # Optional ReDoc
-    path(
-        "api/redoc/",
-        SpectacularRedocView.as_view(url_name="schema"),
-        name="redoc",
-    ),
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/v1/", include("accounts.urls")),
+    path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]

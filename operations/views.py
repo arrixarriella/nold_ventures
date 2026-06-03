@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 from accounts.permissions import IsActiveUser
@@ -26,6 +27,14 @@ from .serializers import (
 # ORDERS
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Orders"]),
+    create=extend_schema(tags=["Orders"]),
+    retrieve=extend_schema(tags=["Orders"]),
+    update=extend_schema(tags=["Orders"]),
+    partial_update=extend_schema(tags=["Orders"]),
+    destroy=extend_schema(tags=["Orders"]),
+)
 class OrdersViewSet(viewsets.ModelViewSet):
     """
     GET    /api/orders/          → list logged-in user's orders
@@ -54,6 +63,14 @@ class OrdersViewSet(viewsets.ModelViewSet):
 # ORDER ITEMS
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Orders"]),
+    create=extend_schema(tags=["Orders"]),
+    retrieve=extend_schema(tags=["Orders"]),
+    update=extend_schema(tags=["Orders"]),
+    partial_update=extend_schema(tags=["Orders"]),
+    destroy=extend_schema(tags=["Orders"]),
+)
 class OrderItemViewSet(viewsets.ModelViewSet):
     """
     GET    /api/order-items/          → list items for logged-in user's orders
@@ -76,6 +93,14 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 # ORDER PAYMENTS
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Orders"]),
+    create=extend_schema(tags=["Orders"]),
+    retrieve=extend_schema(tags=["Orders"]),
+    update=extend_schema(tags=["Orders"]),
+    partial_update=extend_schema(tags=["Orders"]),
+    destroy=extend_schema(tags=["Orders"]),
+)
 class OrdersPaymentViewSet(viewsets.ModelViewSet):
     """
     GET    /api/order-payments/          → list logged-in user's order payments
@@ -105,6 +130,14 @@ class OrdersPaymentViewSet(viewsets.ModelViewSet):
 # SUBSCRIPTIONS
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Subscriptions"]),
+    create=extend_schema(tags=["Subscriptions"]),
+    retrieve=extend_schema(tags=["Subscriptions"]),
+    update=extend_schema(tags=["Subscriptions"]),
+    partial_update=extend_schema(tags=["Subscriptions"]),
+    destroy=extend_schema(tags=["Subscriptions"]),
+)
 class SubscriptionsViewSet(viewsets.ModelViewSet):
     """
     GET    /api/subscriptions/          → list logged-in user's subscriptions
@@ -133,6 +166,14 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 # SUBSCRIPTION ITEMS
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Subscriptions"]),
+    create=extend_schema(tags=["Subscriptions"]),
+    retrieve=extend_schema(tags=["Subscriptions"]),
+    update=extend_schema(tags=["Subscriptions"]),
+    partial_update=extend_schema(tags=["Subscriptions"]),
+    destroy=extend_schema(tags=["Subscriptions"]),
+)
 class SubscriptionItemViewSet(viewsets.ModelViewSet):
     """
     GET    /api/subscription-items/          → list items for logged-in user's subscriptions
@@ -155,6 +196,14 @@ class SubscriptionItemViewSet(viewsets.ModelViewSet):
 # SUBSCRIPTION PAYMENTS
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Subscriptions"]),
+    create=extend_schema(tags=["Subscriptions"]),
+    retrieve=extend_schema(tags=["Subscriptions"]),
+    update=extend_schema(tags=["Subscriptions"]),
+    partial_update=extend_schema(tags=["Subscriptions"]),
+    destroy=extend_schema(tags=["Subscriptions"]),
+)
 class SubscriptionPaymentViewSet(viewsets.ModelViewSet):
     """
     GET    /api/subscription-payments/          → list logged-in user's subscription payments
@@ -183,6 +232,14 @@ class SubscriptionPaymentViewSet(viewsets.ModelViewSet):
 # DELIVERY
 # ─────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=["Deliveries"]),
+    create=extend_schema(tags=["Deliveries"]),
+    retrieve=extend_schema(tags=["Deliveries"]),
+    update=extend_schema(tags=["Deliveries"]),
+    partial_update=extend_schema(tags=["Deliveries"]),
+    destroy=extend_schema(tags=["Deliveries"]),
+)
 class DeliveryViewSet(viewsets.ModelViewSet):
     """
     GET    /api/deliveries/          → list logged-in user's deliveries

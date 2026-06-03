@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, generics, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -24,6 +25,7 @@ User = get_user_model()
 
 # USER REGISTRATION
 
+@extend_schema(tags=["Accounts"])
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -44,6 +46,7 @@ class RegisterView(APIView):
 
 # GENERATE OTP
 
+@extend_schema(tags=["Accounts"])
 class GenerateOTPView(APIView):
     """
     POST /api/v1/auth/otp/generate/
@@ -79,6 +82,7 @@ class GenerateOTPView(APIView):
 
 # VERIFY OTP
 
+@extend_schema(tags=["Accounts"])
 class VerifyOTPView(APIView):
     """
     POST /api/v1/auth/otp/verify/
@@ -131,6 +135,11 @@ class VerifyOTPView(APIView):
 
 # CURRENT USER PROFILE
 
+@extend_schema_view(
+    retrieve=extend_schema(tags=["Accounts"]),
+    update=extend_schema(tags=["Accounts"]),
+    partial_update=extend_schema(tags=["Accounts"]),
+)
 class MeView(generics.RetrieveUpdateAPIView):
     """
     GET    /api/v1/users/me/  → return logged-in user's profile
@@ -145,6 +154,7 @@ class MeView(generics.RetrieveUpdateAPIView):
 # ADDRESS FIELDS — DYNAMIC FORM HELPER
 
 
+@extend_schema(tags=["Accounts"])
 class AddressFieldsView(APIView):
     """
     GET /api/v1/users/addresses/fields/?country=RW
@@ -194,6 +204,14 @@ class AddressFieldsView(APIView):
 # USER ADDRESS
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Accounts"]),
+    create=extend_schema(tags=["Accounts"]),
+    retrieve=extend_schema(tags=["Accounts"]),
+    update=extend_schema(tags=["Accounts"]),
+    partial_update=extend_schema(tags=["Accounts"]),
+    destroy=extend_schema(tags=["Accounts"]),
+)
 class UserAddressViewSet(viewsets.ModelViewSet):
     """
     GET    /api/v1/users/addresses/          → list all addresses for logged-in user
@@ -218,6 +236,11 @@ class UserAddressViewSet(viewsets.ModelViewSet):
 # NOTIFICATION PREFERENCES
 
 
+@extend_schema_view(
+    retrieve=extend_schema(tags=["Accounts"]),
+    update=extend_schema(tags=["Accounts"]),
+    partial_update=extend_schema(tags=["Accounts"]),
+)
 class NotificationPreferenceView(generics.RetrieveUpdateAPIView):
     """
     GET        /api/v1/users/notifications/preferences/  → get preferences
@@ -234,6 +257,7 @@ class NotificationPreferenceView(generics.RetrieveUpdateAPIView):
 # FIREBASE TOKEN
 
 
+@extend_schema(tags=["Accounts"])
 class FirebaseTokenView(APIView):
     """
     POST   /api/v1/users/firebase-token/  → register or update a device FCM token

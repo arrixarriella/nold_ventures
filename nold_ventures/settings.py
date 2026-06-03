@@ -114,6 +114,20 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "My API",
     "DESCRIPTION": "API documentation for my Django project",
     "VERSION": "1.0.0",
+    "TAGS": [
+        {"name": "Accounts"},
+        {"name": "Deliveries"},
+        {"name": "Inventory"},
+        {"name": "Notifications"},
+        {"name": "Orders"},
+        {"name": "Products"},
+        {"name": "Subscriptions"},
+        {"name": "Transactions"},
+    ],
+    "SWAGGER_UI_SETTINGS": {
+        "tagsSorter": "alpha",
+        "operationsSorter": "alpha",
+    },
 }
 
 CORS_ALLOW_ALL_ORIGINS = True

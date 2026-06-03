@@ -13,15 +13,13 @@ from .views import (
 
 router = DefaultRouter()
 
-router.register(r"orders", OrdersViewSet, basename="orders")
+router.register(r"deliveries", DeliveryViewSet, basename="deliveries")
 router.register(r"order-items", OrderItemViewSet, basename="order-items")
 router.register(r"order-payments", OrdersPaymentViewSet, basename="order-payments")
-
-router.register(r"subscriptions", SubscriptionsViewSet, basename="subscriptions")
+router.register(r"orders", OrdersViewSet, basename="orders")
 router.register(r"subscription-items", SubscriptionItemViewSet, basename="subscription-items")
 router.register(r"subscription-payments", SubscriptionPaymentViewSet, basename="subscription-payments")
-
-router.register(r"deliveries", DeliveryViewSet, basename="deliveries")
+router.register(r"subscriptions", SubscriptionsViewSet, basename="subscriptions")
 
 
 urlpatterns = [
