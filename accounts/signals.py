@@ -13,7 +13,9 @@ User = get_user_model()
 def create_notification_preference(sender, instance, created, **kwargs):
     if created:
         from .models import NotificationPreference
+        from .utils import generate_and_send_otp
         NotificationPreference.objects.get_or_create(user=instance)
+        generate_and_send_otp(user=instance, otp_type="both")
 
 
 # ─────────────────────────────────────────────

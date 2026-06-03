@@ -1,3 +1,4 @@
+import os
 import secrets
 from datetime import timedelta
 
@@ -57,8 +58,8 @@ def send_otp_email(user, otp_code):
 
 
 def send_otp_sms(user, otp_code):
-    # SMS integration can be added here later (e.g. Twilio, Africa's Talking)
-    pass
+    message = f"Your Nold Ventures verification code is: {otp_code}. It expires in 10 minutes. Do not share it with anyone."
+    send_sms(str(user.phone_number), message)
 
 
 def generate_and_send_otp(user, otp_type=None):
@@ -85,7 +86,6 @@ def generate_and_send_otp(user, otp_type=None):
 def send_order_notification(order):
     user = order.user
 
-    # ── Email ──
     try:
         html_content = render_to_string(
             "emails/order_confirmation.html",
@@ -110,10 +110,9 @@ def send_order_notification(order):
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send order email: {e}")
 
-    # ── SMS ──
     try:
         send_sms(
-            phone_number=user.phone_number,
+            phone_number=str(user.phone_number),
             message=(
                 f"Hi {user.full_name}, your order #{order.id} has been placed successfully "
                 f"on {order.order_date.strftime('%d %b %Y')}. "
@@ -131,7 +130,6 @@ def send_order_notification(order):
 def send_subscription_notification(subscription):
     user = subscription.user
 
-    # ── Email ──
     try:
         html_content = render_to_string(
             "emails/subscription_confirmation.html",
@@ -156,10 +154,9 @@ def send_subscription_notification(subscription):
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send subscription email: {e}")
 
-    # ── SMS ──
     try:
         send_sms(
-            phone_number=user.phone_number,
+            phone_number=str(user.phone_number),
             message=(
                 f"Hi {user.full_name}, your {subscription.frequency} subscription #{subscription.id} "
                 f"is now active starting {subscription.start_date}. "
@@ -170,16 +167,4 @@ def send_subscription_notification(subscription):
         print(f"[SMS ERROR] Failed to send subscription SMS: {e}")
 
 
-# ─────────────────────────────────────────────
-# SMS SENDER (Africa's Talking — plug in later)
-# ─────────────────────────────────────────────
-
-def send_sms(phone_number, message):
-    # TODO: Integrate Africa's Talking or Twilio here
-    # Example with Africa's Talking:
-    # import africastalking
-    # africastalking.initialize(username, api_key)
-    # sms = africastalking.SMS
-    # sms.send(message, [phone_number])
-    print(f"[SMS] To: {phone_number} | Message: {message}")
-    pass
+# ─────────────────────────
