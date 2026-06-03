@@ -80,16 +80,79 @@ class IsAdminUser(BasePermission):
         )
 
 
-class IsFarmerOrAdmin(BasePermission):
+class IsStaff(BasePermission):
     """
-    Allow access to farmers and admins.
-    Useful for product/listing management endpoints.
+    Allow access only to users with user_type = STAFF.
     """
-    message = "Only farmers or admins can perform this action."
+    message = "Only staff can perform this action."
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.user_type == request.user.STAFF
+        )
+
+
+class IsDeliveryGuy(BasePermission):
+    """
+    Allow access only to users with user_type = DELIVERY.
+    """
+    message = "Only delivery personnel can perform this action."
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.user_type == request.user.DELIVERY
+        )
+
+
+class IsStaffOrAdmin(BasePermission):
+    """
+    Allow access to staff and admins.
+    """
+    message = "Only staff or admins can perform this action."
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and (
-            request.user.user_type in (request.user.FARMER, request.user.ADMIN)
+            request.user.user_type in (request.user.STAFF, request.user.ADMIN)
+            or request.user.is_staff
+        )
+
+
+class IsDeliveryOrAdmin(BasePermission):
+    """
+    Allow access to delivery guys and admins.
+    """
+    message = "Only delivery personnel or admins can perform this action."
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.user_type in (request.user.DELIVERY, request.user.ADMIN)
+            or request.user.is_staff
+        )
+
+
+class IsClientOrFarmer(BasePermission):
+    """
+    Allow access to clients and farmers.
+    """
+    message = "Only clients or farmers can perform this action."
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.user_type in (request.user.CLIENT, request.user.FARMER)
+        )
+
+
+class IsClientOrFarmerOrAdmin(BasePermission):
+    """
+    Allow access to clients, farmers and admins.
+    """
+    message = "Only clients, farmers or admins can perform this action."
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (
+            request.user.user_type in (request.user.CLIENT, request.user.FARMER, request.user.ADMIN)
             or request.user.is_staff
         )
 

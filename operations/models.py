@@ -45,7 +45,7 @@ class OrdersPayment(models.Model):
 
     def save(self, *args, **kwargs):
         self.amount = sum(
-            item.quantity * item.product.price
+            item.quantity * item.product.price_per_unit
             for item in self.order.items.all()
         )
         super().save(*args, **kwargs)
@@ -108,7 +108,7 @@ class SubscriptionPayment(models.Model):
 
     def save(self, *args, **kwargs):
         self.amount = sum(
-            item.quantity * item.product.price
+            item.quantity * item.product.price_per_unit
             for item in self.subscription.items.all()
         )
         super().save(*args, **kwargs)

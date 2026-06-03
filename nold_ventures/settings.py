@@ -111,22 +111,23 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "My API",
-    "DESCRIPTION": "API documentation for my Django project",
+    "TITLE": "Nold Ventures Poultry API",
+    "DESCRIPTION": "API for a poultry business serving clients (meat/eggs), farmers (chicks/feed), staff, and delivery personnel.",
     "VERSION": "1.0.0",
     "TAGS": [
-        {"name": "Accounts"},
-        {"name": "Deliveries"},
-        {"name": "Inventory"},
-        {"name": "Notifications"},
-        {"name": "Orders"},
-        {"name": "Products"},
-        {"name": "Subscriptions"},
-        {"name": "Transactions"},
+        {"name": "Auth"},
+        {"name": "Admin Dashboard"},
+        {"name": "Client Dashboard"},
+        {"name": "Farmer Dashboard"},
+        {"name": "Delivery Dashboard"},
+        {"name": "Schema"},
     ],
+    "PREPROCESSING_HOOKS": ["drf_spectacular.hooks.preprocess_exclude_path_format"],
+    "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
     "SWAGGER_UI_SETTINGS": {
-        "tagsSorter": "alpha",
+        "tagsSorter": "none",
         "operationsSorter": "alpha",
+        "docExpansion": "none",
     },
 }
 

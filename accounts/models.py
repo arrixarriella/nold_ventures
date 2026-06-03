@@ -50,11 +50,15 @@ class User(AbstractUser, PermissionsMixin):
 
     CLIENT = "CLIENT"
     FARMER = "FARMER"
+    STAFF = "STAFF"
+    DELIVERY = "DELIVERY"
     ADMIN = "ADMIN"
 
     USER_TYPE_CHOICES = [
         (CLIENT, "Client"),
         (FARMER, "Farmer"),
+        (STAFF, "Staff"),
+        (DELIVERY, "Delivery Guy"),
         (ADMIN, "Admin"),
     ]
 

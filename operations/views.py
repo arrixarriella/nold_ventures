@@ -1,7 +1,13 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import viewsets, filters
+from rest_framework import filters, mixins
 from rest_framework.permissions import IsAuthenticated
-from accounts.permissions import IsActiveUser
+from rest_framework.viewsets import GenericViewSet
+from accounts.permissions import (
+    IsActiveUser,
+    IsDeliveryOrAdmin,
+    IsClientOrFarmerOrAdmin,
+    IsStaffOrAdmin,
+)
 
 from .models import (
     Orders,
@@ -28,32 +34,27 @@ from .serializers import (
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Orders"]),
-    create=extend_schema(tags=["Orders"]),
-    retrieve=extend_schema(tags=["Orders"]),
-    update=extend_schema(tags=["Orders"]),
-    partial_update=extend_schema(tags=["Orders"]),
-    destroy=extend_schema(tags=["Orders"]),
+    list=extend_schema(tags=["Admin Dashboard", "Client Dashboard", "Delivery Dashboard", "Farmer Dashboard"]),
+    create=extend_schema(tags=["Client Dashboard", "Farmer Dashboard"]),
 )
-class OrdersViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/orders/          → list logged-in user's orders
-    POST   /api/orders/          → create a new order
-    GET    /api/orders/<id>/     → retrieve a single order
-    PUT    /api/orders/<id>/     → full update
-    PATCH  /api/orders/<id>/     → partial update
-    DELETE /api/orders/<id>/     → delete
-    """
+class OrdersViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset           = Orders.objects.all()
     serializer_class   = OrdersSerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsClientOrFarmerOrAdmin]
     filter_backends    = [filters.OrderingFilter]
     ordering_fields    = ["order_date", "delivery_date"]
     ordering           = ["-order_date"]
+    http_method_names  = ["get", "post", "head", "options"]
 
     def get_queryset(self):
-        return Orders.objects.filter(
-            user=self.request.user
-        ).prefetch_related("items").order_by("-order_date")
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return Orders.objects.all().prefetch_related("items")
+        return Orders.objects.filter(user=user).prefetch_related("items").order_by("-order_date")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -64,29 +65,23 @@ class OrdersViewSet(viewsets.ModelViewSet):
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Orders"]),
-    create=extend_schema(tags=["Orders"]),
-    retrieve=extend_schema(tags=["Orders"]),
-    update=extend_schema(tags=["Orders"]),
-    partial_update=extend_schema(tags=["Orders"]),
-    destroy=extend_schema(tags=["Orders"]),
+    list=extend_schema(tags=["Client Dashboard"]),
+    create=extend_schema(tags=["Client Dashboard"]),
 )
-class OrderItemViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/order-items/          → list items for logged-in user's orders
-    POST   /api/order-items/          → add item to an order
-    GET    /api/order-items/<id>/     → retrieve a single item
-    PUT    /api/order-items/<id>/     → full update
-    PATCH  /api/order-items/<id>/     → partial update
-    DELETE /api/order-items/<id>/     → delete
-    """
+class OrderItemViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset           = OrderItem.objects.all()
     serializer_class   = OrderItemSerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsClientOrFarmerOrAdmin]
 
     def get_queryset(self):
-        return OrderItem.objects.filter(
-            order__user=self.request.user
-        ).select_related("product", "order")
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return OrderItem.objects.all().select_related("product", "order")
+        return OrderItem.objects.filter(order__user=user).select_related("product", "order")
 
 
 # ─────────────────────────────────────────────
@@ -94,33 +89,26 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Orders"]),
-    create=extend_schema(tags=["Orders"]),
-    retrieve=extend_schema(tags=["Orders"]),
-    update=extend_schema(tags=["Orders"]),
-    partial_update=extend_schema(tags=["Orders"]),
-    destroy=extend_schema(tags=["Orders"]),
+    list=extend_schema(tags=["Admin Dashboard", "Client Dashboard"]),
+    create=extend_schema(tags=["Client Dashboard"]),
 )
-class OrdersPaymentViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/order-payments/          → list logged-in user's order payments
-    POST   /api/order-payments/          → create a payment for an order
-    GET    /api/order-payments/<id>/     → retrieve a single payment
-    PUT    /api/order-payments/<id>/     → full update
-    PATCH  /api/order-payments/<id>/     → partial update
-    DELETE /api/order-payments/<id>/     → delete
-    """
+class OrdersPaymentViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset           = OrdersPayment.objects.all()
     serializer_class   = OrdersPaymentSerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsClientOrFarmerOrAdmin]
     filter_backends    = [filters.OrderingFilter]
     ordering_fields    = ["payment_date", "amount", "status"]
     ordering           = ["-payment_date"]
 
     def get_queryset(self):
-        # ✅ Users only see their own payments
-        return OrdersPayment.objects.filter(
-            user=self.request.user
-        ).select_related("order").order_by("-payment_date")
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return OrdersPayment.objects.all().select_related("order")
+        return OrdersPayment.objects.filter(user=user).select_related("order").order_by("-payment_date")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -131,32 +119,27 @@ class OrdersPaymentViewSet(viewsets.ModelViewSet):
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Subscriptions"]),
-    create=extend_schema(tags=["Subscriptions"]),
-    retrieve=extend_schema(tags=["Subscriptions"]),
-    update=extend_schema(tags=["Subscriptions"]),
-    partial_update=extend_schema(tags=["Subscriptions"]),
-    destroy=extend_schema(tags=["Subscriptions"]),
+    list=extend_schema(tags=["Admin Dashboard", "Client Dashboard", "Delivery Dashboard"]),
+    create=extend_schema(tags=["Client Dashboard"]),
 )
-class SubscriptionsViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/subscriptions/          → list logged-in user's subscriptions
-    POST   /api/subscriptions/          → create a new subscription
-    GET    /api/subscriptions/<id>/     → retrieve a single subscription
-    PUT    /api/subscriptions/<id>/     → full update
-    PATCH  /api/subscriptions/<id>/     → partial update
-    DELETE /api/subscriptions/<id>/     → delete
-    """
+class SubscriptionsViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset           = Subscriptions.objects.all()
     serializer_class   = SubscriptionsSerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsClientOrFarmerOrAdmin]
     filter_backends    = [filters.OrderingFilter]
     ordering_fields    = ["start_date", "status", "frequency"]
     ordering           = ["-start_date"]
+    http_method_names  = ["get", "post", "head", "options"]
 
     def get_queryset(self):
-        return Subscriptions.objects.filter(
-            user=self.request.user
-        ).prefetch_related("items").order_by("-start_date")
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return Subscriptions.objects.all().prefetch_related("items")
+        return Subscriptions.objects.filter(user=user).prefetch_related("items").order_by("-start_date")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -167,28 +150,24 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Subscriptions"]),
-    create=extend_schema(tags=["Subscriptions"]),
-    retrieve=extend_schema(tags=["Subscriptions"]),
-    update=extend_schema(tags=["Subscriptions"]),
-    partial_update=extend_schema(tags=["Subscriptions"]),
-    destroy=extend_schema(tags=["Subscriptions"]),
+    list=extend_schema(tags=["Client Dashboard"]),
+    create=extend_schema(tags=["Client Dashboard"]),
 )
-class SubscriptionItemViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/subscription-items/          → list items for logged-in user's subscriptions
-    POST   /api/subscription-items/          → add item to a subscription
-    GET    /api/subscription-items/<id>/     → retrieve a single item
-    PUT    /api/subscription-items/<id>/     → full update
-    PATCH  /api/subscription-items/<id>/     → partial update
-    DELETE /api/subscription-items/<id>/     → delete
-    """
+class SubscriptionItemViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset           = SubscriptionItem.objects.all()
     serializer_class   = SubscriptionItemSerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsClientOrFarmerOrAdmin]
 
     def get_queryset(self):
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return SubscriptionItem.objects.all().select_related("product", "subscription")
         return SubscriptionItem.objects.filter(
-            subscription__user=self.request.user
+            subscription__user=user
         ).select_related("product", "subscription")
 
 
@@ -197,31 +176,27 @@ class SubscriptionItemViewSet(viewsets.ModelViewSet):
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Subscriptions"]),
-    create=extend_schema(tags=["Subscriptions"]),
-    retrieve=extend_schema(tags=["Subscriptions"]),
-    update=extend_schema(tags=["Subscriptions"]),
-    partial_update=extend_schema(tags=["Subscriptions"]),
-    destroy=extend_schema(tags=["Subscriptions"]),
+    list=extend_schema(tags=["Admin Dashboard", "Client Dashboard"]),
+    create=extend_schema(tags=["Client Dashboard"]),
 )
-class SubscriptionPaymentViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/subscription-payments/          → list logged-in user's subscription payments
-    POST   /api/subscription-payments/          → create a payment for a subscription
-    GET    /api/subscription-payments/<id>/     → retrieve a single payment
-    PUT    /api/subscription-payments/<id>/     → full update
-    PATCH  /api/subscription-payments/<id>/     → partial update
-    DELETE /api/subscription-payments/<id>/     → delete
-    """
+class SubscriptionPaymentViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset           = SubscriptionPayment.objects.all()
     serializer_class   = SubscriptionPaymentSerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsClientOrFarmerOrAdmin]
     filter_backends    = [filters.OrderingFilter]
     ordering_fields    = ["payment_date", "amount", "status"]
     ordering           = ["-payment_date"]
 
     def get_queryset(self):
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return SubscriptionPayment.objects.all().select_related("subscription")
         return SubscriptionPayment.objects.filter(
-            user=self.request.user
+            user=user
         ).select_related("subscription").order_by("-payment_date")
 
     def perform_create(self, serializer):
@@ -229,39 +204,27 @@ class SubscriptionPaymentViewSet(viewsets.ModelViewSet):
 
 
 # ─────────────────────────────────────────────
-# DELIVERY
+# DELIVERIES
 # ─────────────────────────────────────────────
 
 @extend_schema_view(
-    list=extend_schema(tags=["Deliveries"]),
-    create=extend_schema(tags=["Deliveries"]),
-    retrieve=extend_schema(tags=["Deliveries"]),
-    update=extend_schema(tags=["Deliveries"]),
-    partial_update=extend_schema(tags=["Deliveries"]),
-    destroy=extend_schema(tags=["Deliveries"]),
+    list=extend_schema(tags=["Admin Dashboard", "Delivery Dashboard"]),
 )
-class DeliveryViewSet(viewsets.ModelViewSet):
-    """
-    GET    /api/deliveries/          → list logged-in user's deliveries
-    POST   /api/deliveries/          → create a delivery
-    GET    /api/deliveries/<id>/     → retrieve a single delivery
-    PUT    /api/deliveries/<id>/     → full update
-    PATCH  /api/deliveries/<id>/     → partial update
-    DELETE /api/deliveries/<id>/     → delete
-    """
+class DeliveryViewSet(
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    queryset           = Delivery.objects.all()
     serializer_class   = DeliverySerializer
-    permission_classes = [IsAuthenticated, IsActiveUser]
+    permission_classes = [IsAuthenticated, IsActiveUser, IsDeliveryOrAdmin]
     filter_backends    = [filters.OrderingFilter, filters.SearchFilter]
     search_fields      = ["status"]
     ordering_fields    = ["delivery_date", "status"]
     ordering           = ["-delivery_date"]
+    http_method_names  = ["get", "head", "options"]
 
     def get_queryset(self):
-        return Delivery.objects.filter(
-            user=self.request.user
-        ).select_related(
-            "order", "delivery_address"
-        ).order_by("-delivery_date")
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user = self.request.user
+        if user.user_type == user.ADMIN or user.is_staff:
+            return Delivery.objects.all().select_related("order", "delivery_address")
+        return Delivery.objects.filter(user=user).select_related("order", "delivery_address")
