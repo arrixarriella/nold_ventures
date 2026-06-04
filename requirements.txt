@@ -2,7 +2,9 @@ africastalking==2.0.2
 asgiref==3.11.1
 attrs==26.1.0
 certifi==2026.5.20
+cffi==2.0.0
 charset-normalizer==3.4.7
+cryptography==48.0.0
 Django==6.0.5
 django-cors-headers==4.9.0
 django-countries==8.2.0
@@ -17,7 +19,9 @@ jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 packaging==26.2
 phonenumbers==9.0.30
+pycparser==3.0
 PyJWT==2.13.0
+pyOpenSSL==26.2.0
 python-dotenv==1.2.2
 PyYAML==6.0.3
 referencing==0.37.0

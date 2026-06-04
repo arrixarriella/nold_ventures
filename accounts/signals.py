@@ -13,16 +13,14 @@ User = get_user_model()
 def create_notification_preference(sender, instance, created, **kwargs):
     if created:
         from .models import NotificationPreference
-        from .utils import generate_and_send_otp
         NotificationPreference.objects.get_or_create(user=instance)
-        generate_and_send_otp(user=instance, otp_type="both")
 
 
 # ─────────────────────────────────────────────
 # ENFORCE SINGLE DEFAULT ADDRESS
 # ─────────────────────────────────────────────
 
-@receiver(post_save, sender="accounts.UserAddress")  # 👈 was "users.UserAddress"
+@receiver(post_save, sender="accounts.UserAddress")
 def enforce_single_default_address(sender, instance, **kwargs):
     if instance.is_default:
         from .models import UserAddress
@@ -36,7 +34,7 @@ def enforce_single_default_address(sender, instance, **kwargs):
 # AUTO-SET DEFAULT ADDRESS IF NONE EXISTS
 # ─────────────────────────────────────────────
 
-@receiver(post_save, sender="accounts.UserAddress")  # 👈 was "users.UserAddress"
+@receiver(post_save, sender="accounts.UserAddress")
 def auto_set_default_address(sender, instance, created, **kwargs):
     if created:
         from .models import UserAddress

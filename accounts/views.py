@@ -23,8 +23,14 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            user.is_active = False  # require OTP verification before login
+            user.save(update_fields=["is_active"])
+            generate_and_send_otp(user, otp_type="both")
             return Response(
-                {"message": "User registered successfully.", "user": UserSerializer(user).data},
+                {
+                    "message": "Registration successful. Check your email and phone for your OTP.",
+                    "user_id": user.id,
+                },
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -87,7 +93,7 @@ class GenerateOTPView(APIView):
 
     def post(self, request):
         user_id  = request.data.get("user_id")
-        otp_type = request.data.get("otp_type")
+        otp_type = request.data.get("otp_type", "both")
 
         if not user_id:
             return Response({"error": "user_id is required."}, status=status.HTTP_400_BAD_REQUEST)

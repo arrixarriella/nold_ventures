@@ -2,10 +2,45 @@ import os
 import secrets
 from datetime import timedelta
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
+
+
+# ─────────────────────────────────────────────
+# SMS SENDER
+# ─────────────────────────────────────────────
+
+def send_sms(phone_number, message):
+    import requests
+    import urllib3
+    urllib3.disable_warnings()
+
+    phone = str(phone_number).strip().replace(" ", "").replace("-", "")
+    if not phone.startswith("+"):
+        phone = "+250" + phone.lstrip("0")
+
+    url = "https://api.sandbox.africastalking.com/version1/messaging"
+    headers = {
+        "Accept": "application/json",
+        "apiKey": os.getenv("AT_API_KEY"),
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    data = {
+        "username": os.getenv("AT_USERNAME", "sandbox"),
+        "to": phone,
+        "message": message,
+    }
+
+    try:
+        response = requests.post(url, headers=headers, data=data, verify=False)
+        print(f"[SMS] Response: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"[SMS ERROR] Failed to send to {phone}: {e}")
 
 
 def generate_otp(user, otp_type=None):
@@ -165,6 +200,3 @@ def send_subscription_notification(subscription):
         )
     except Exception as e:
         print(f"[SMS ERROR] Failed to send subscription SMS: {e}")
-
-
-# ─────────────────────────
