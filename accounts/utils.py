@@ -89,7 +89,6 @@ def send_otp_email(user, otp_code):
         msg.send()
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send OTP email to {user.email}: {e}")
-        raise
 
 
 def send_otp_sms(user, otp_code):
