@@ -36,4 +36,6 @@ uritemplate==4.2.0
 urllib3==2.7.0
 dj-database-url
 psycopg2-binary
+sendgrid
+django-sendgrid-v5
 
