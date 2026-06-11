@@ -38,4 +38,4 @@ dj-database-url
 psycopg2-binary
 sendgrid
 django-sendgrid-v5
-
+whitenoise
