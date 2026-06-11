@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model, authenticate
+from django.utils import timezone
+from datetime import timedelta
 from rest_framework import serializers
 
 User = get_user_model()
@@ -23,13 +25,24 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ["email", "full_name", "phone_number", "password", "confirm_password", "user_type"]
 
     def validate_email(self, value):
-        if User.objects.filter(email__iexact=value).exists():
+        normalized = value.lower()
+
+        # Remove stale unverified accounts with this email
+        User.objects.filter(email__iexact=normalized, is_active=False).delete()
+
+        if User.objects.filter(email__iexact=normalized, is_active=True).exists():
             raise serializers.ValidationError("A user with this email already exists.")
-        return value.lower()
+
+        return normalized
 
     def validate_phone_number(self, value):
-        if User.objects.filter(phone_number=value).exists():
+
+        # Remove stale unverified accounts with this phone number
+        User.objects.filter(phone_number=value, is_active=False).delete()
+
+        if User.objects.filter(phone_number=value, is_active=True).exists():
             raise serializers.ValidationError("A user with this phone number already exists.")
+
         return value
 
     def validate(self, data):
